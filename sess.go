@@ -192,6 +192,11 @@ func newUDPSession(conv uint32, dataShards, parityShards int, l *Listener, conn 
 
 	return sess
 }
+func (s *UDPSession) ReadPeekSize() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.kcp.PeekSize()
+}
 
 // Read implements net.Conn
 func (s *UDPSession) Read(b []byte) (n int, err error) {
@@ -256,6 +261,11 @@ RESET_TIMER:
 			return 0, errors.WithStack(io.ErrClosedPipe)
 		}
 	}
+}
+func (s *UDPSession) WriteWaitSend() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.kcp.WaitSnd()
 }
 
 // Write implements net.Conn
